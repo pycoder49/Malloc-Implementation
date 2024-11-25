@@ -155,6 +155,5 @@ void *vmalloc(size_t size)
     assert((uintptr_t)((char *)best_fit_block + sizeof(struct block_header)) % BLKALIGN == 0);
     printf("\n\nhello\n\n");
 
-    //return (void *)((char *)best_fit_block + sizeof(struct block_header));
-    return NULL;
+    return (void *)((char *)best_fit_block + sizeof(struct block_header));
 }
