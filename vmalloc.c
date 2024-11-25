@@ -94,10 +94,17 @@ void *vmalloc(size_t size)
 
         current_pointer = _get_next_block(current_pointer);
     }
+
+    if(best_fit_block == NULL){
+        return NULL;
+    }
     
     //perform a split
     if(_get_size_in_bytes(best_fit_block) > round_up_size){
         _perform_split(best_fit_block, size);
+    }
+    else {
+        best_fit_block->size_status |= VM_BUSY;  // Mark as busy if no split occurs
     }
 
     printf("%ld\n", best_fit_block->size_status);
