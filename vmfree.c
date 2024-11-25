@@ -8,7 +8,6 @@
  * undefined behavior occurs.
  * If ptr is NULL, no operation is performed.
  */
-void vmfree(void *ptr)
-{
-    // TODO
+void vmfree(void *ptr){
+    
 }

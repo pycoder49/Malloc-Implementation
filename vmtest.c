@@ -9,7 +9,8 @@ int main()
     /* alternatively, load a heap image */
     // vmload("tests/img/many_free.img");
 
-    void *ptr = vmalloc(16);
+    //void *ptr = vmalloc(16);
+    void *ptr1 = vmalloc(35);
 
     vminfo(); // print out how the heap looks like at this point in time for
               // easy visualization
