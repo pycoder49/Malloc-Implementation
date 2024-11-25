@@ -31,33 +31,80 @@ static int _get_size_in_bytes(struct block_header* current_pointer){
     return BLKSZ(current_pointer);
 }
 
-static int _get_size_in_8byte_words(struct block_header* current_pointer){
-    return BLKSZ(current_pointer) / 8;
-}
+// static int _get_size_in_8byte_words(struct block_header* current_pointer){
+//     return BLKSZ(current_pointer) / 8;
+// }
 
 static void* _get_next_block(struct block_header* current_pointer){
     return (struct block_header *)((char *)current_pointer + _get_size_in_bytes(current_pointer));
 }
 
-static void _perform_split(struct block_header* current_pointer, int rounded_size){
-    //making the second block
-    struct block_header* second_block = (struct block_header*)((char *)current_pointer + rounded_size);
-    int second_block_size = _get_size_in_bytes(current_pointer) - rounded_size;
+static void _perform_split(struct block_header* current_pointer, int requested_size) {
+    int rounded_size = _get_rounded(requested_size);
+    int size_of_original_block = _get_size_in_bytes(current_pointer);
 
-    second_block->size_status = second_block_size & VM_BLKSZMASK;   //available free size
-    second_block->size_status |= VM_PREVBUSY;                       //prev block is busy
-    second_block->size_status &= ~VM_BUSY;                          //set own status bit as free
+    printf("\n\n\n\n");
 
-    //adding footer to second block
-    struct block_footer* second_footer = (struct block_footer *)((char *)second_block + second_block_size -sizeof(struct block_footer));
-    second_footer->size = second_block_size;
+    //first we get the total size of the first block
+    printf("requested size: %d\n", requested_size);
+    printf("rounded size: %d\n", rounded_size);
+    printf("size in bytes of current at start: %d\n", _get_size_in_bytes(current_pointer));
 
-    //updating the first block
-    current_pointer->size_status = rounded_size |
-                                   (current_pointer->size_status & VM_PREVBUSY) |
-                                   VM_BUSY;
+    printf("--------------------\n");
+    printf("Total size of current and second blocks after split: %d %d\n",
+            rounded_size, _get_size_in_bytes(current_pointer) - rounded_size);
+    printf("--------------------\n");
+
+    //updating information about the first block
+    struct block_header* first_block = current_pointer;
+
+    first_block->size_status = rounded_size | (first_block->size_status & VM_PREVBUSY) | VM_BUSY;
+    printf("size of  first block: %lu\n", (unsigned long)(first_block->size_status & VM_BLKSZMASK));
+    //first_block->size_status &= VM_ENDMARK;
+
+
+    //adding the second block header
+    struct block_header* second_block = (struct block_header *)((char *)current_pointer + rounded_size);
+
+    second_block->size_status = (size_of_original_block - _get_size_in_bytes(first_block)) |
+                                VM_PREVBUSY;
+    second_block->size_status &= ~VM_BUSY;
+
+
 
     
+    printf("\n\n\n\n");
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // //calculate the second block pointer
+    // struct block_header* second_block = (struct block_header *)ROUND_UP(
+    //     (uintptr_t)((char *)current_pointer + rounded_size), BLKALIGN
+    // );
+    // int second_block_size = _get_size_in_bytes(current_pointer) - (int)((char *)second_block - (char *)current_pointer);
+
+    // //set second block header
+    // second_block->size_status = second_block_size & VM_BLKSZMASK; //free size
+    // second_block->size_status |= VM_PREVBUSY; //mark previous block as busy
+    // second_block->size_status &= ~VM_BUSY; //mark second block as free
+
+    // //set second block footer
+    // struct block_footer* second_footer = (struct block_footer *)((char *)second_block + second_block_size - sizeof(struct block_footer));
+    // second_footer->size = second_block_size;
+
+    // //update the first block
+    // current_pointer->size_status = rounded_size |
+    //                                (current_pointer->size_status & VM_PREVBUSY) |
+    //                                VM_BUSY;
 }
 
 
@@ -88,7 +135,6 @@ void *vmalloc(size_t size)
 
     //getting the pointer to the best fit block
     while(current_pointer->size_status != VM_ENDMARK){
-        
         current_block_size = _get_size_in_bytes(current_pointer);
  
         if (!(current_pointer->size_status & VM_BUSY) && 
@@ -108,17 +154,11 @@ void *vmalloc(size_t size)
     
     //perform a split
     if(_get_size_in_bytes(best_fit_block) > round_up_size){
-        _perform_split(best_fit_block, round_up_size);
+        _perform_split(best_fit_block, size);
     }
+
+    // assert((uintptr_t)((char *)best_fit_block + sizeof(struct block_header)) % BLKALIGN == 0);
+    // printf("hello");
 
     return best_fit_block;
 }
-
-// int main(){
-
-
-//     void *ptr = vmalloc(35);
-//     assert(ptr != NULL);
-
-//     return 1;
-// }
