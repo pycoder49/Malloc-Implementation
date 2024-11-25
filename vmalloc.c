@@ -43,23 +43,23 @@ static void _perform_split(struct block_header* current_pointer, int requested_s
     int rounded_size = _get_rounded(requested_size);
     int size_of_original_block = _get_size_in_bytes(current_pointer);
 
-    printf("\n\n\n\n");
+    //printf("\n\n\n\n");
 
     //first we get the total size of the first block
-    printf("requested size: %d\n", requested_size);
-    printf("rounded size: %d\n", rounded_size);
-    printf("size in bytes of current at start: %d\n", _get_size_in_bytes(current_pointer));
+    //printf("requested size: %d\n", requested_size);
+    //printf("rounded size: %d\n", rounded_size);
+    //printf("size in bytes of current at start: %d\n", _get_size_in_bytes(current_pointer));
 
-    printf("--------------------\n");
-    printf("Total size of current and second blocks after split: %d %d\n",
-            rounded_size, _get_size_in_bytes(current_pointer) - rounded_size);
-    printf("--------------------\n");
+    //printf("--------------------\n");
+    //printf("Total size of current and second blocks after split: %d %d\n",
+    //        rounded_size, _get_size_in_bytes(current_pointer) - rounded_size);
+    //printf("--------------------\n");
 
     //updating information about the first block
     struct block_header* first_block = current_pointer;
 
     first_block->size_status = rounded_size | (first_block->size_status & VM_PREVBUSY) | VM_BUSY;
-    printf("size of  first block: %lu\n", (unsigned long)(first_block->size_status & VM_BLKSZMASK));
+    //printf("size of  first block: %lu\n", (unsigned long)(first_block->size_status & VM_BLKSZMASK));
     //first_block->size_status &= VM_ENDMARK;
 
 
@@ -73,7 +73,7 @@ static void _perform_split(struct block_header* current_pointer, int requested_s
 
 
     
-    printf("\n\n\n\n");
+    //printf("\n\n\n\n");
     
     
     
@@ -146,19 +146,14 @@ void *vmalloc(size_t size)
 
         current_pointer = _get_next_block(current_pointer);
     }
-
-    //if best fit is heapstart, and heapstart is not big enough, return null
-    if(best_fit_block == heapstart && _get_size_in_bytes(heapstart) < round_up_size){
-        return NULL;
-    }
     
     //perform a split
     if(_get_size_in_bytes(best_fit_block) > round_up_size){
         _perform_split(best_fit_block, size);
     }
 
-    // assert((uintptr_t)((char *)best_fit_block + sizeof(struct block_header)) % BLKALIGN == 0);
-    // printf("hello");
+    assert((uintptr_t)((char *)best_fit_block + sizeof(struct block_header)) % BLKALIGN == 0);
+    printf("\n\nhello\n\n");
 
-    return best_fit_block;
+    return (void *)((char *)best_fit_block + sizeof(struct block_header));
 }
