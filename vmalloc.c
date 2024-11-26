@@ -31,10 +31,6 @@ static int _get_size_in_bytes(struct block_header* current_pointer){
     return BLKSZ(current_pointer);
 }
 
-// static int _get_size_in_8byte_words(struct block_header* current_pointer){
-//     return BLKSZ(current_pointer) / 8;
-// }
-
 static void* _get_next_block(struct block_header* current_pointer){
     return (struct block_header *)((char *)current_pointer + _get_size_in_bytes(current_pointer));
 }
@@ -51,10 +47,7 @@ static void _perform_split(struct block_header* current_pointer, int requested_s
     struct block_header* second_block = (struct block_header *)((char *)current_pointer + rounded_size);
     second_block->size_status = (size_of_original_block - _get_size_in_bytes(first_block)) | VM_PREVBUSY;
     second_block->size_status &= ~VM_BUSY;
-
-    printf("%ld %ld\n", first_block->size_status, second_block->size_status);
 }
-
 
 void *vmalloc(size_t size)
 {
@@ -85,9 +78,9 @@ void *vmalloc(size_t size)
     while(current_pointer->size_status != VM_ENDMARK){
         current_block_size = _get_size_in_bytes(current_pointer);
  
-        if (!(current_pointer->size_status & VM_BUSY) && 
-            current_block_size >= round_up_size &&
-            (best_fit_block == NULL || current_block_size < _get_size_in_bytes(best_fit_block)))
+        if (!(current_pointer->size_status & VM_BUSY) &&                                            //if the current block is free
+            current_block_size >= round_up_size &&                                                  //if size of current block is >= roudned_size
+            (best_fit_block == NULL || current_block_size < _get_size_in_bytes(best_fit_block)))    //current block size is strictly less than best fit size
         {
             best_fit_block = current_pointer;
         }
@@ -106,8 +99,6 @@ void *vmalloc(size_t size)
     else {
         best_fit_block->size_status |= VM_BUSY;  // Mark as busy if no split occurs
     }
-
-    printf("%ld\n", best_fit_block->size_status);
 
     return (void *)((char *)best_fit_block + sizeof(struct block_header));
 }
