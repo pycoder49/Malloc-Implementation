@@ -9,10 +9,6 @@
  * undefined behavior occurs.
  * If ptr is NULL, no operation is performed.
  */
-#include "vm.h"
-#include "vmlib.h"
-#include <stdio.h>
-
 void vmfree(void *ptr) {
     if (ptr == NULL) {
         return;
