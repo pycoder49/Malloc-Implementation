@@ -16,6 +16,7 @@ void vminfo()
     int busy, prev_busy;
     size_t blocksz;
     size_t totalsz = 0;
+    size_t biggest_free = 0;
 
     printf("---------------------------------------\n");
     printf(" %-6s %-7s %-8s %-8s %-7s\n", "#", "stat", "offset", "size",
@@ -27,6 +28,10 @@ void vminfo()
         prev_busy = block->size_status & VM_PREVBUSY ? 1 : 0;
         printf(" %-6d %-7s %-8zu %-8zu %-7s\n", blockid++, blkstats[busy],
                BLKOFF(block), blocksz, blkstats[prev_busy]);
+
+        if(!busy && (blocksz > biggest_free)){
+          biggest_free = blocksz;
+        }
 
         if (busy) {
             nbusy++;
@@ -41,4 +46,5 @@ void vminfo()
     printf("---------------------------------------\n");
     printf("Total: %zu bytes, Free: %d, Busy: %d, Total: %d\n", totalsz, nfree,
            nbusy, nfree + nbusy);
+    printf("The largest free block is #%d with sizec %zu\n", blockid-1, biggest_free);
 }

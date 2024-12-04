@@ -11,12 +11,17 @@ int main()
 
     //void *ptr = vmalloc(16);
     void *ptr = vmalloc(16);
+    vminfo();
     void *ptr2 = vmalloc(32);
+    vminfo();
     void *ptr3 = vmalloc(100);
+    vminfo();
     void *ptr4 = vmalloc(200);
+    vminfo();
     void *ptr5 = vmalloc(4);
+    vminfo();
     
-    vminfo(); // print out how the heap looks like at this point in time for
+     // print out how the heap looks like at this point in time for
               // easy visualization
     
     printf("\n\n\n");
