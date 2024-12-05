@@ -67,3 +67,49 @@ end heap structure after using first-fit
 As we can see, the first-fit approach fails to properly allocate vmalloc(40) because we need a block of 48 bytes, but since the 
 first empty block is a 32 byte long block, it simply returns null, never going to the end of the heap like best-fit and 
 allocating to the end of the heap.
+
+
+
+
+
+-------------------------------------------------------------------
+-------------------------------------------------------------------
+UPDATED DESIGN QUESTION
+-------------------------------------------------------------------
+-------------------------------------------------------------------
+
+
+1) Consider an updated implementation where in case of freeing, we only coalesce it with exactly 1 next block in the heap 
+if it is free. Give an example of a program (in C or pseudocode) where all the allocations succeed in the current design
+(like in this PA), but some allocations would fail with the updated freeing strategy.
+
+
+Pseudocode:
+
+init_heap(200);
+
+//allocate blocks
+ptr1 = vmalloc(20); --> allocates a 32-byte block
+ptr2 = vmalloc(20);
+ptr3 = vmalloc(20);
+ptr4 = vmalloc(20);
+
+//now we free some blocks
+vmfree(ptr2);
+vmfree(ptr4);
+vmfree(ptr3);
+
+//now we allocate a larger block
+ptr5 = vmalloc(70);
+
+
+
+This vmalloc call fails and returns NULL because after all the vmalloc() and free() calls, there are a total
+of two free blocks--> ptr2 (free with 32 bytes), and ptr3 (free with 64 bytes).
+
+When ptr3 was freed, in our updated logic, only the next block will be joined together with it (ptr4 which is 
+32 bytes) and not the previous block (ptr2 which is 32 free bytes). So, after freeing, ptr3 now points to a block
+with 64 bytes of free memory.
+
+Now, if you try to vmalloc(70), it will fail because the program will not be able to find a block large enough,
+even though there are over 70 bytes of free memory right next to each other.
