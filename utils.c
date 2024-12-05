@@ -49,5 +49,5 @@ void vminfo()
     printf("---------------------------------------\n");
     printf("Total: %zu bytes, Free: %d, Busy: %d, Total: %d\n", totalsz, nfree,
            nbusy, nfree + nbusy);
-    printf("The largest free block is #%zu with sizec %zu\n", biggest_id-1, biggest_free);
+    printf("The largest free block is #%zu with size %zu\n", biggest_id-1, biggest_free);
 }
